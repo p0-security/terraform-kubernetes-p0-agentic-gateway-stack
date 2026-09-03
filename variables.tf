@@ -1,13 +1,13 @@
 variable "release_name" {
   description = "Helm release name."
   type        = string
-  default     = "oauthed-mcp"
+  default     = "agentic-gateway"
 }
 
 variable "namespace" {
   description = "Kubernetes namespace to deploy into."
   type        = string
-  default     = "oauthed-mcp"
+  default     = "agentic-gateway"
 }
 
 variable "create_namespace" {

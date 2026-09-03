@@ -11,18 +11,18 @@ variable "kube_context" {
   type        = string
 }
 
-# Passthrough variables of p0-helm-oauthed-mcp helm chart
+# Passthrough variables of the agentic-gateway-stack helm chart
 
 variable "release_name" {
   description = "Helm release name."
   type        = string
-  default     = "oauthed-mcp"
+  default     = "agentic-gateway"
 }
 
 variable "namespace" {
   description = "Kubernetes namespace to deploy into."
   type        = string
-  default     = "oauthed-mcp"
+  default     = "agentic-gateway"
 }
 
 variable "create_namespace" {
