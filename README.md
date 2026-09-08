@@ -13,7 +13,7 @@ provider "helm" {
 
 module "p0_agentic_gateway_stack" {
   source  = "p0-security/p0-agentic-gateway-stack/kubernetes"
-  version = "0.2.0"
+  version = "0.2.1"
 
   values = [
     file("${path.module}/values.yaml"),
@@ -34,7 +34,21 @@ module "p0_agentic_gateway_stack" {
 
 Values are merged left-to-right (last wins), equivalent to `helm install -f`. See the [chart's values.yaml](https://github.com/p0-security/p0-helm-oauthed-mcp/blob/main/values.yaml) for the full schema.
 
-Before applying, and for all post-deploy steps (DNS, verification, staging→prod), follow the [chart's deployment guide](https://github.com/p0-security/p0-helm-oauthed-mcp#deploy).
+There is no secret setup step to run before `terraform apply`. The chart creates `app-secrets` itself, from a pre-install hook. The cluster prerequisites still apply, though — a working block-storage StorageClass for the bundled PostgreSQL, which on EKS means the EBS CSI driver add-on. Those are listed in the [chart's deployment guide](https://github.com/p0-security/p0-helm-oauthed-mcp#prerequisites).
+
+Afterwards, patch in the real OIDC client secret, and on an external database the real PostgreSQL password. The hook writes a placeholder for the first and never overwrites either once set. Restart both Deployments after patching — they read the Secret when a pod starts, so running pods keep the old value until they are replaced:
+
+```bash
+kubectl -n <namespace> patch secret app-secrets \
+  --type merge \
+  -p '{"stringData":{"OIDC_CLIENT_SECRET":"<your-oidc-client-secret>"}}'
+
+kubectl -n <namespace> rollout restart deploy/agentic-auth-server deploy/agentic-gateway-server
+```
+
+If your secrets already come from External Secrets or Vault, set `agentic-gateway.secretsJob.enabled: false` in `values` and create the Secret yourself. It has to exist before the release is created, so with `create_namespace = true` the namespace does not exist yet at that point — create it outside Terraform and set `create_namespace = false`, or let a separate `kubernetes_namespace` resource own it.
+
+For all post-deploy steps (DNS, verification, staging→prod), follow the [deployment guide](https://github.com/p0-security/p0-helm-oauthed-mcp#deploy).
 
 ## Migrating from `p0-oauthed-mcp`
 
@@ -78,6 +92,7 @@ Each module version pins an exact chart version. To use a specific chart version
 
 | Module version | Chart version |
 |----------------|---------------|
+| 0.2.1          | 0.10.1        |
 | 0.2.0          | 0.10.0        |
 
 For chart versions 0.8.6 and earlier, see the matrix in
