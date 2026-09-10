@@ -70,18 +70,18 @@ kubectl -n <namespace> rollout restart deploy/agentic-auth-server
 Then create the DNS record for `gateway_url` and finish registration in the P0 console. The [chart's deployment guide](https://github.com/p0-security/p0-helm-oauthed-mcp#deploy) walks through both.
 
 Certificates come from the Let's Encrypt staging environment by default, so the
-gateway serves a certificate browsers and MCP clients will reject. Staging has
-no rate limit, which is what you want while DNS is still propagating and a first
-install may need a few attempts. Once the DNS record resolves and a staging
-certificate has issued, set `lets_encrypt_env = "prod"` and apply again to get a
-trusted certificate:
+gateway serves a certificate browsers and MCP clients will reject. Staging's
+limits are far higher, which is what you want while DNS is still propagating and
+a first install may need a few attempts. Once the DNS record resolves and a
+staging certificate has issued, set `lets_encrypt_env = "prod"` and apply again
+to get a trusted certificate:
 
 ```hcl
   lets_encrypt_env = "prod"
 ```
 
-Prod allows five certificates per domain per week, so leave it on staging until
-the rest of the install works.
+Prod issues at most five certificates a week for the same set of hostnames, so
+leave it on staging until the rest of the install works.
 
 If your secrets come from External Secrets or Vault, set `agentic-gateway.secretsJob.enabled: false` through `extra_values` and create the Secret yourself. It has to exist before the release is created, so with `create_namespace = true` the namespace does not exist yet at that point. Create it outside Terraform and set `create_namespace = false`, or let a separate `kubernetes_namespace` resource own it.
 
@@ -167,7 +167,7 @@ A chart pin bump is a minor release. Any input rename, removal or default change
 | release\_name | Helm release name and GatewayClass name. | `string` | `"agentic-gateway"` |
 | namespace | Kubernetes namespace to deploy into. | `string` | `"p0-agentic-gateway"` |
 | create\_namespace | Create the namespace if it does not exist. | `bool` | `true` |
-| lets\_encrypt\_env | `staging` issues untrusted certificates with no rate limit; `prod` issues trusted ones, limited to five per domain per week. Switch to `prod` once a staging certificate has issued. | `string` | `"staging"` |
+| lets\_encrypt\_env | `staging` issues untrusted certificates under much higher limits; `prod` issues trusted ones, at most five a week for the same set of hostnames. Switch to `prod` once a staging certificate has issued. | `string` | `"staging"` |
 | open\_id\_domain | Regex a signed-in account's email domain must match. Empty admits every verified account. | `string` | `""` |
 | extra\_values | Additional YAML values documents; typed inputs win over them. | `list(string)` | `[]` |
 | timeout | Seconds Helm waits, hooks included. Must exceed 300. | `number` | `360` |

@@ -52,7 +52,7 @@ variable "lets_encrypt_email" {
 }
 
 variable "lets_encrypt_env" {
-  description = "Let's Encrypt environment. staging issues untrusted certificates with no rate limit; prod issues trusted certificates and allows five duplicate certificates per domain per week. Starts on staging so a first install that fails repeatedly does not exhaust the prod limit. Switch to prod once DNS resolves and a staging certificate has issued."
+  description = "Let's Encrypt environment. staging issues untrusted certificates under much higher rate limits; prod issues trusted certificates and allows five per week for the same set of hostnames. Starts on staging so a first install that fails repeatedly does not exhaust the prod limit. Switch to prod once DNS resolves and a staging certificate has issued."
   type        = string
   default     = "staging"
   nullable    = false
