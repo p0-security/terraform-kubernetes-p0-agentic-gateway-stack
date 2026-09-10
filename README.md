@@ -69,6 +69,20 @@ kubectl -n <namespace> rollout restart deploy/agentic-auth-server
 
 Then create the DNS record for `gateway_url` and finish registration in the P0 console. The [chart's deployment guide](https://github.com/p0-security/p0-helm-oauthed-mcp#deploy) walks through both.
 
+Certificates come from the Let's Encrypt staging environment by default, so the
+gateway serves a certificate browsers and MCP clients will reject. Staging has
+no rate limit, which is what you want while DNS is still propagating and a first
+install may need a few attempts. Once the DNS record resolves and a staging
+certificate has issued, set `lets_encrypt_env = "prod"` and apply again to get a
+trusted certificate:
+
+```hcl
+  lets_encrypt_env = "prod"
+```
+
+Prod allows five certificates per domain per week, so leave it on staging until
+the rest of the install works.
+
 If your secrets come from External Secrets or Vault, set `agentic-gateway.secretsJob.enabled: false` through `extra_values` and create the Secret yourself. It has to exist before the release is created, so with `create_namespace = true` the namespace does not exist yet at that point. Create it outside Terraform and set `create_namespace = false`, or let a separate `kubernetes_namespace` resource own it.
 
 ## Immutable inputs
@@ -95,7 +109,7 @@ Version 0.2.x took the chart's values as a raw `values` list. Version 1.0.0 take
 
 This module was published as `p0-security/p0-oauthed-mcp/kubernetes` through version 0.1.9. That module is deprecated, pins chart 0.8.6, and will not receive the chart versions that create `app-secrets`.
 
-**The release name and namespace defaults are different**: the old module defaulted both to `oauthed-mcp`, this one to `agentic-gateway`. Both are replace-forcing in the Helm provider, so if you relied on the old defaults, pin them explicitly or Terraform destroys and recreates the release:
+**The release name and namespace defaults are different**: the old module defaulted both to `oauthed-mcp`, this one to `agentic-gateway` and `p0-agentic-gateway`. Both are replace-forcing in the Helm provider, so if you relied on the old defaults, pin them explicitly or Terraform destroys and recreates the release:
 
 ```hcl
 module "p0_agentic_gateway_stack" {
@@ -151,9 +165,9 @@ A chart pin bump is a minor release. Any input rename, removal or default change
 | p0\_audience | Token audience for your tenant; usually `p0_url`. | `string` | required |
 | p0\_service\_account\_email | P0 service account allowed to manage the gateway. | `string` | required |
 | release\_name | Helm release name and GatewayClass name. | `string` | `"agentic-gateway"` |
-| namespace | Kubernetes namespace to deploy into. | `string` | `"agentic-gateway"` |
+| namespace | Kubernetes namespace to deploy into. | `string` | `"p0-agentic-gateway"` |
 | create\_namespace | Create the namespace if it does not exist. | `bool` | `true` |
-| lets\_encrypt\_env | `prod` or `staging`. | `string` | `"prod"` |
+| lets\_encrypt\_env | `staging` issues untrusted certificates with no rate limit; `prod` issues trusted ones, limited to five per domain per week. Switch to `prod` once a staging certificate has issued. | `string` | `"staging"` |
 | open\_id\_domain | Regex a signed-in account's email domain must match. Empty admits every verified account. | `string` | `""` |
 | extra\_values | Additional YAML values documents; typed inputs win over them. | `list(string)` | `[]` |
 | timeout | Seconds Helm waits, hooks included. Must exceed 300. | `number` | `360` |

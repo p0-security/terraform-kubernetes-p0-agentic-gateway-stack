@@ -13,7 +13,7 @@ variable "release_name" {
 variable "namespace" {
   description = "Kubernetes namespace to deploy into. Changing it replaces the release and leaves the old PostgreSQL volume behind in the old namespace."
   type        = string
-  default     = "agentic-gateway"
+  default     = "p0-agentic-gateway"
   nullable    = false
 
   validation {
@@ -52,9 +52,9 @@ variable "lets_encrypt_email" {
 }
 
 variable "lets_encrypt_env" {
-  description = "Let's Encrypt environment. prod issues trusted certificates and allows five duplicate certificates per domain per week; staging issues untrusted certificates without that limit."
+  description = "Let's Encrypt environment. staging issues untrusted certificates with no rate limit; prod issues trusted certificates and allows five duplicate certificates per domain per week. Starts on staging so a first install that fails repeatedly does not exhaust the prod limit. Switch to prod once DNS resolves and a staging certificate has issued."
   type        = string
-  default     = "prod"
+  default     = "staging"
   nullable    = false
 
   validation {

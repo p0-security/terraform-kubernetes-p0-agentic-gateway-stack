@@ -40,8 +40,8 @@ run "defaults" {
   }
 
   assert {
-    condition     = helm_release.p0_agentic_gateway_stack.namespace == "agentic-gateway"
-    error_message = "default namespace should be agentic-gateway"
+    condition     = helm_release.p0_agentic_gateway_stack.namespace == "p0-agentic-gateway"
+    error_message = "default namespace should be p0-agentic-gateway, the namespace the console, the deploy guide and the provider examples all use"
   }
 
   assert {
@@ -109,8 +109,8 @@ run "renders_typed_inputs_into_chart_values" {
   }
 
   assert {
-    condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["letsEncrypt"]["env"] == "prod" && yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["letsEncrypt"]["email"] == "ops@example.com"
-    error_message = "lets_encrypt_env should default to prod and carry the email"
+    condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["letsEncrypt"]["env"] == "staging" && yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["letsEncrypt"]["email"] == "ops@example.com"
+    error_message = "lets_encrypt_env should default to staging so a failing first install cannot exhaust the prod rate limit"
   }
 
   assert {
@@ -123,8 +123,9 @@ run "typed_inputs_win_over_extra_values" {
   command = plan
 
   variables {
+    lets_encrypt_env = "staging"
     extra_values = [
-      "letsEncrypt:\n  env: staging\ncollector:\n  gcpProjectId: my-project\n",
+      "letsEncrypt:\n  env: prod\ncollector:\n  gcpProjectId: my-project\n",
     ]
   }
 
@@ -134,7 +135,7 @@ run "typed_inputs_win_over_extra_values" {
   }
 
   assert {
-    condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[1])["letsEncrypt"]["env"] == "prod"
+    condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[1])["letsEncrypt"]["env"] == "staging"
     error_message = "the typed document must be last so typed inputs win over extra_values"
   }
 
