@@ -23,13 +23,19 @@ locals {
         className = var.release_name
         host      = local.gateway_host
       }
-      agenticAuthServer = {
-        oidcClientId = var.oidc_client_id
-        openIdDomain = var.open_id_domain
-        p0Url        = var.p0_url
-        p0Audience   = var.p0_audience
-        gatewayIss   = var.gateway_url
-      }
+      # Optional inputs are omitted when empty. The typed document wins over
+      # extra_values, so writing a key here unconditionally would override a
+      # caller's value with an empty one — and for openIdDomain, an empty
+      # value is the permissive setting that admits every verified account.
+      agenticAuthServer = merge(
+        {
+          oidcClientId = var.oidc_client_id
+          p0Url        = var.p0_url
+          p0Audience   = var.p0_audience
+          gatewayIss   = var.gateway_url
+        },
+        var.open_id_domain == "" ? {} : { openIdDomain = var.open_id_domain },
+      )
       agenticGatewayServer = {
         p0Url               = var.p0_url
         p0Audience          = var.p0_audience

@@ -48,6 +48,8 @@ Anything the chart accepts that this module has no input for goes in `extra_valu
 
 Typed inputs are merged after `extra_values`, so a key that has an input cannot be overridden from `extra_values`. Set it through the input.
 
+Optional inputs are the exception: when one is left empty the module omits its key entirely, so a value you set for it in `extra_values` still applies. `open_id_domain` is the one to know about — it is the login allowlist, and an empty value admits every account your identity provider verifies.
+
 ### Helm timeout and wait
 
 Helm waits `timeout` seconds (default 360) for the install or upgrade, hooks included. The default is above the 300 second deadline of the chart's secrets Job on purpose: a stuck Job then fails with its own error rather than a generic Helm timeout. Keep it above 300.

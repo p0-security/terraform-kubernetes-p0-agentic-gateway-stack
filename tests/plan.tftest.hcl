@@ -94,8 +94,8 @@ run "renders_typed_inputs_into_chart_values" {
   }
 
   assert {
-    condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["agentic-gateway"]["agenticAuthServer"]["openIdDomain"] == ""
-    error_message = "open_id_domain should default to empty, admitting every account the identity provider verifies"
+    condition     = !can(yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["agentic-gateway"]["agenticAuthServer"]["openIdDomain"])
+    error_message = "an unset open_id_domain should omit the key, leaving the chart default and extra_values in force"
   }
 
   assert {
@@ -141,6 +141,44 @@ run "typed_inputs_win_over_extra_values" {
   assert {
     condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["collector"]["gcpProjectId"] == "my-project"
     error_message = "extra_values should carry keys the module has no input for"
+  }
+}
+
+run "unset_open_id_domain_leaves_extra_values_alone" {
+  command = plan
+
+  variables {
+    extra_values = [
+      "agentic-gateway:\n  agenticAuthServer:\n    openIdDomain: \"[^@]*@example[.]com\"\n",
+    ]
+  }
+
+  # The typed document is merged last, so an unconditional openIdDomain = ""
+  # would turn a caller's allowlist into open access.
+  assert {
+    condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["agentic-gateway"]["agenticAuthServer"]["openIdDomain"] == "[^@]*@example[.]com"
+    error_message = "an allowlist set through extra_values must survive when open_id_domain is unset"
+  }
+
+  assert {
+    condition     = !can(yamldecode(helm_release.p0_agentic_gateway_stack.values[1])["agentic-gateway"]["agenticAuthServer"]["openIdDomain"])
+    error_message = "the typed document must not carry openIdDomain when the input is unset"
+  }
+}
+
+run "open_id_domain_wins_when_set" {
+  command = plan
+
+  variables {
+    open_id_domain = "[^@]*@p0[.]dev"
+    extra_values = [
+      "agentic-gateway:\n  agenticAuthServer:\n    openIdDomain: \"[^@]*@example[.]com\"\n",
+    ]
+  }
+
+  assert {
+    condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[1])["agentic-gateway"]["agenticAuthServer"]["openIdDomain"] == "[^@]*@p0[.]dev"
+    error_message = "a set open_id_domain must win over extra_values"
   }
 }
 
