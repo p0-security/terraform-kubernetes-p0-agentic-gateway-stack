@@ -94,6 +94,11 @@ run "renders_typed_inputs_into_chart_values" {
   }
 
   assert {
+    condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["agentic-gateway"]["agenticAuthServer"]["openIdDomain"] == ""
+    error_message = "open_id_domain should default to empty, admitting every account the identity provider verifies"
+  }
+
+  assert {
     condition     = yamldecode(helm_release.p0_agentic_gateway_stack.values[0])["agentic-gateway"]["agenticGatewayServer"]["manageAllowedEmails"] == "gw@p0.iam.gserviceaccount.com"
     error_message = "manageAllowedEmails should be p0_service_account_email"
   }
