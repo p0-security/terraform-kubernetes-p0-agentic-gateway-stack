@@ -122,6 +122,10 @@ run "renders_typed_inputs_into_chart_values" {
 run "typed_inputs_win_over_extra_values" {
   command = plan
 
+  # The input and the extra_values entry must disagree, and neither may be the
+  # default. Set both to the same value, or leave the input at its default, and
+  # this run passes whatever order the documents are merged in — it stops
+  # testing precedence while still looking like coverage.
   variables {
     lets_encrypt_env = "staging"
     extra_values = [
