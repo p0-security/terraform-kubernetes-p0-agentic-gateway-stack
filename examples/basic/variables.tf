@@ -11,10 +11,10 @@ variable "kube_context" {
   type        = string
 }
 
-# Passthrough variables of the agentic-gateway-stack helm chart
+# Gateway settings; the P0 console shows every value on the install page.
 
 variable "release_name" {
-  description = "Helm release name."
+  description = "Helm release name and GatewayClass name; the console uses the gateway id."
   type        = string
   default     = "agentic-gateway"
 }
@@ -22,16 +22,40 @@ variable "release_name" {
 variable "namespace" {
   description = "Kubernetes namespace to deploy into."
   type        = string
-  default     = "agentic-gateway"
+  default     = "p0-agentic-gateway"
 }
 
-variable "create_namespace" {
-  description = "Create the namespace if it does not exist."
-  type        = bool
-  default     = true
+variable "gateway_url" {
+  description = "Public URL of the gateway, https and hostname only."
+  type        = string
 }
 
-variable "values_file" {
-  description = "Path to a Helm values YAML file. See the chart's values.yaml for the full schema."
+variable "lets_encrypt_email" {
+  description = "Email registered with Let's Encrypt."
+  type        = string
+}
+
+variable "oidc_client_id" {
+  description = "OAuth client ID at your identity provider."
+  type        = string
+}
+
+variable "storage_class" {
+  description = "StorageClass for PostgreSQL and VictoriaLogs volumes, for example gp2 on EKS."
+  type        = string
+}
+
+variable "p0_url" {
+  description = "Your P0 tenant URL."
+  type        = string
+}
+
+variable "p0_audience" {
+  description = "Token audience for your P0 tenant; usually the same as p0_url."
+  type        = string
+}
+
+variable "p0_service_account_email" {
+  description = "P0 service account allowed to manage the gateway."
   type        = string
 }
