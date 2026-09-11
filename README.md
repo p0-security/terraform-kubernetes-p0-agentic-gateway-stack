@@ -113,6 +113,21 @@ For chart versions 0.8.6 and earlier, see the matrix in
 | namespace | Kubernetes namespace to deploy into. | `string` | `"agentic-gateway"` |
 | create\_namespace | Create the namespace if it does not exist. | `bool` | `true` |
 | values | List of YAML values strings merged left-to-right. | `list(string)` | `[]` |
+| timeout | Seconds Helm waits for an install or upgrade, hooks included. | `number` | `360` |
+| wait | Wait for every resource to be ready before marking the release deployed. | `bool` | `false` |
+
+Both defaults differ from the Helm provider's own, deliberately.
+
+The chart runs a Job during install that writes the application secrets, and
+Kubernetes kills that Job after 300 seconds. The provider would also give up at
+300, so the two race and a slow Job surfaces as a generic Helm timeout instead
+of the Job's own error. Waiting 360 seconds lets the Job fail first and say why.
+
+`wait` is off because a first install cannot reach readiness. The TLS
+certificate is issued over HTTP-01, which needs a public DNS record pointing at
+a load balancer that does not exist until after the apply finishes. Waiting for
+a certificate that is still blocked on DNS just burns the timeout. Turn `wait`
+on once DNS is in place and you want later applies to block on rollout.
 
 ## Outputs
 

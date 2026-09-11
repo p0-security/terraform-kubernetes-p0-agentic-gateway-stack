@@ -12,6 +12,9 @@ resource "helm_release" "p0_agentic_gateway_stack" {
   chart            = "agentic-gateway-stack"
   version          = local.chart_version
 
+  timeout = var.timeout
+  wait    = var.wait
+
   values = var.values
 }
 
