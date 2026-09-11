@@ -64,7 +64,7 @@ destroy and recreate the release (losing PostgreSQL and Valkey data):
 ```hcl
 module "p0_agentic_gateway_stack" {
   source  = "p0-security/p0-agentic-gateway-stack/kubernetes"
-  version = "0.2.0"
+  version = "0.2.1"
 
   # Required only when migrating an existing release that used the old defaults.
   release_name = "oauthed-mcp"
