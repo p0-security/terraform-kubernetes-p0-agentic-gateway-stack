@@ -34,6 +34,16 @@ run "defaults" {
   }
 
   assert {
+    condition     = helm_release.p0_agentic_gateway_stack.timeout == 360
+    error_message = "timeout should default to 360 so it outlasts the secrets Job's 300 second deadline"
+  }
+
+  assert {
+    condition     = helm_release.p0_agentic_gateway_stack.wait == false
+    error_message = "wait should default to false; the TLS certificate cannot issue before the DNS record exists"
+  }
+
+  assert {
     condition     = helm_release.p0_agentic_gateway_stack.version == local.chart_version
     error_message = "chart version should be pinned to local.chart_version"
   }
@@ -51,6 +61,8 @@ run "override_release_metadata" {
     release_name     = "my-mcp"
     namespace        = "platform"
     create_namespace = false
+    timeout          = 900
+    wait             = true
     values           = []
   }
 
@@ -67,6 +79,11 @@ run "override_release_metadata" {
   assert {
     condition     = helm_release.p0_agentic_gateway_stack.create_namespace == false
     error_message = "create_namespace override not applied"
+  }
+
+  assert {
+    condition     = helm_release.p0_agentic_gateway_stack.timeout == 900 && helm_release.p0_agentic_gateway_stack.wait == true
+    error_message = "timeout and wait overrides not applied"
   }
 
   assert {
@@ -89,4 +106,17 @@ run "values_passthrough" {
     condition     = length(helm_release.p0_agentic_gateway_stack.values) == 2
     error_message = "both values entries should be passed through to the helm release"
   }
+}
+
+# A timeout at or below the secrets Job's 300 second deadline puts the release
+# timeout back in a race with the Job, which is the failure this input exists to
+# avoid.
+run "rejects_timeout_at_job_deadline" {
+  command = plan
+
+  variables {
+    timeout = 300
+  }
+
+  expect_failures = [var.timeout]
 }

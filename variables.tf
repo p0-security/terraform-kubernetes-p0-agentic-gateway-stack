@@ -21,3 +21,22 @@ variable "values" {
   type        = list(string)
   default     = []
 }
+
+variable "timeout" {
+  description = "Seconds Helm waits for an install or upgrade, hooks included. Must exceed the 300 second deadline of the chart's secrets Job so a stuck Job fails with its own error instead of a generic Helm timeout."
+  type        = number
+  default     = 360
+  nullable    = false
+
+  validation {
+    condition     = var.timeout > 300
+    error_message = "timeout must be greater than 300 seconds, the secrets Job's deadline."
+  }
+}
+
+variable "wait" {
+  description = "Wait for every resource to be ready before marking the release deployed. Off by default: the TLS certificate cannot issue until the DNS record for the gateway host exists, so waiting on a first install times out."
+  type        = bool
+  default     = false
+  nullable    = false
+}
