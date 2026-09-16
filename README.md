@@ -116,18 +116,16 @@ For chart versions 0.8.6 and earlier, see the matrix in
 | timeout | Seconds Helm waits for an install or upgrade, hooks included. | `number` | `360` |
 | wait | Wait for every resource to be ready before marking the release deployed. | `bool` | `false` |
 
-Both defaults differ from the Helm provider's own, deliberately.
+Both defaults differ from the Helm provider's own.
 
-The chart runs a Job during install that writes the application secrets, and
-Kubernetes kills that Job after 300 seconds. The provider would also give up at
-300, so the two race and a slow Job surfaces as a generic Helm timeout instead
-of the Job's own error. Waiting 360 seconds lets the Job fail first and say why.
+`timeout` must be greater than 300 seconds. The chart's secrets Job gives up at
+300, and a release timeout at or below that hides the Job's own error behind a
+generic Helm timeout.
 
-`wait` is off because a first install cannot reach readiness. The TLS
-certificate is issued over HTTP-01, which needs a public DNS record pointing at
-a load balancer that does not exist until after the apply finishes. Waiting for
-a certificate that is still blocked on DNS just burns the timeout. Turn `wait`
-on once DNS is in place and you want later applies to block on rollout.
+`wait` is off because a first install cannot reach readiness: the TLS
+certificate needs a DNS record pointing at a load balancer that does not exist
+until the apply finishes. Turn it on once DNS is in place and you want later
+applies to block on rollout.
 
 ## Outputs
 
