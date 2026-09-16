@@ -1,16 +1,17 @@
 locals {
   # Pinned chart version for this module release. Update in lockstep with
   # module version tags — see the compatibility matrix in README.md.
-  chart_version = "0.10.3"
+  chart_version = "0.11.0"
 }
 
 resource "helm_release" "p0_agentic_gateway_stack" {
   name             = var.release_name
   namespace        = var.namespace
   create_namespace = var.create_namespace
-  repository       = "oci://registry-1.docker.io/p0security"
-  chart            = "agentic-gateway-stack"
-  version          = local.chart_version
+
+  repository = "oci://registry-1.docker.io/p0security"
+  chart      = "agentic-gateway-stack"
+  version    = local.chart_version
 
   values = var.values
 }

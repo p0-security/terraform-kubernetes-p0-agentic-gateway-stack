@@ -92,6 +92,7 @@ Each module version pins an exact chart version. To use a specific chart version
 
 | Module version | Chart version |
 |----------------|---------------|
+| 0.2.3          | 0.11.0        |
 | 0.2.2          | 0.10.3        |
 | 0.2.1          | 0.10.2        |
 | 0.2.0          | 0.10.0        |
