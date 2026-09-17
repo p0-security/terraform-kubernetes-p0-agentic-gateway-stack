@@ -7,7 +7,7 @@ provider "helm" {
 
 module "p0_agentic_gateway_stack" {
   source  = "p0-security/p0-agentic-gateway-stack/kubernetes"
-  version = "0.2.1"
+  version = "0.2.3"
 
   release_name     = var.release_name
   namespace        = var.namespace

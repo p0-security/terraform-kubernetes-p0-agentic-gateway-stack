@@ -13,7 +13,7 @@ provider "helm" {
 
 module "p0_agentic_gateway_stack" {
   source  = "p0-security/p0-agentic-gateway-stack/kubernetes"
-  version = "0.2.1"
+  version = "0.2.3"
 
   values = [
     file("${path.module}/values.yaml"),
