@@ -1,3 +1,6 @@
+NOTE: This repo has been archived in favor of https://github.com/p0-security/terraform-kubernetes-p0-ai-gateway-stack
+
+
 # terraform-kubernetes-p0-agentic-gateway-stack
 
 Terraform module that deploys [agentic-gateway](https://github.com/p0-security/agentic-gateway) via the [agentic-gateway-stack](https://github.com/p0-security/p0-helm-oauthed-mcp) umbrella Helm chart. The chart bundles Envoy Gateway, cert-manager, Let's Encrypt (ACME HTTP-01), PostgreSQL, and Valkey into a single install.
